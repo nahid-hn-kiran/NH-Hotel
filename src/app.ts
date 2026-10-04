@@ -10,6 +10,7 @@ import { authRoutes } from './modules/auth/auth.routes.js';
 import { roomRoutes } from './modules/room/room.routes.js';
 import { bookingRoutes } from './modules/booking/booking.routes.js';
 import { paymentRoutes } from './modules/payment/payment.routes.js';
+import { ragRoutes } from './modules/rag/rag.routes.js';
 
 const app: Express = express();
 
@@ -48,6 +49,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/rooms', roomRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
 app.use('/api/v1/payments', paymentRoutes);
+app.use('/api/v1/rag', ragRoutes);
 
 // 404 Handler
 app.use(notFound);
