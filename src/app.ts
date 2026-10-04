@@ -11,6 +11,7 @@ import { roomRoutes } from './modules/room/room.routes.js';
 import { bookingRoutes } from './modules/booking/booking.routes.js';
 import { paymentRoutes } from './modules/payment/payment.routes.js';
 import { ragRoutes } from './modules/rag/rag.routes.js';
+import { agentRoutes } from './modules/agent/agent.routes.js';
 
 const app: Express = express();
 
@@ -50,6 +51,7 @@ app.use('/api/v1/rooms', roomRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/rag', ragRoutes);
+app.use('/api/v1/agent', agentRoutes);
 
 // 404 Handler
 app.use(notFound);
