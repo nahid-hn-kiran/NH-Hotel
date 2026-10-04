@@ -293,10 +293,74 @@ const updateBookingStatus = async (bookingId: string, status: BookingStatus) => 
   });
 };
 
+const getAllBookings = async (query: {
+  page?: number;
+  limit?: number;
+  status?: BookingStatus;
+  search?: string;
+}) => {
+  const page = Number(query.page || 1);
+  const limit = Number(query.limit || 50);
+  const skip = (page - 1) * limit;
+
+  const where: any = {};
+
+  if (query.status) {
+    where.status = query.status;
+  }
+
+  if (query.search) {
+    where.OR = [
+      { bookingCode: { contains: query.search, mode: 'insensitive' } },
+      { guest: { name: { contains: query.search, mode: 'insensitive' } } },
+      { guest: { email: { contains: query.search, mode: 'insensitive' } } },
+    ];
+  }
+
+  const [data, total] = await Promise.all([
+    prisma.booking.findMany({
+      where,
+      skip,
+      take: limit,
+      include: {
+        room: {
+          include: {
+            roomType: true,
+          },
+        },
+        guest: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
+        payments: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.booking.count({ where }),
+  ]);
+
+  const totalPage = Math.ceil(total / limit);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage,
+    },
+    data,
+  };
+};
+
 export const bookingService = {
   checkRoomAvailability,
   createBooking,
   getMyBookings,
+  getAllBookings,
   getBookingById,
   cancelBooking,
   updateBookingStatus,

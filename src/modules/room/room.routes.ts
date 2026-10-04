@@ -25,6 +25,13 @@ router.post(
   roomController.createRoomType
 );
 
+router.patch(
+  '/types/:id',
+  authenticate,
+  authorize(UserRole.ADMIN, UserRole.SUPER_ADMIN),
+  roomController.updateRoomType
+);
+
 // Staff Physical Room Inventory Management
 router.get(
   '/',

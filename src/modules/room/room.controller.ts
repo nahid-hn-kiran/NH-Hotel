@@ -67,10 +67,22 @@ const updateRoomStatus = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateRoomType = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id as string;
+  const result = await roomService.updateRoomType(id, req.body);
+
+  sendResponse(res, {
+    statusCode: 200,
+    message: 'Room type updated successfully',
+    data: result,
+  });
+});
+
 export const roomController = {
   getRoomTypes,
   getRoomTypeDetails,
   createRoomType,
+  updateRoomType,
   getRooms,
   createRoom,
   updateRoomStatus,

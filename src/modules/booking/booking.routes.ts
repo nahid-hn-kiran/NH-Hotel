@@ -33,7 +33,14 @@ router.get('/:id', authenticate, bookingController.getBookingDetails);
 
 router.patch('/:id/cancel', authenticate, bookingController.cancelBooking);
 
-// Protected Staff / Admin Status Update
+// Protected Staff / Admin Status & Ledger Routes
+router.get(
+  '/',
+  authenticate,
+  authorize(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.FRONT_DESK),
+  bookingController.getAllBookings
+);
+
 router.patch(
   '/:id/status',
   authenticate,

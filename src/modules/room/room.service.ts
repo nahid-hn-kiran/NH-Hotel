@@ -209,10 +209,31 @@ const updatePhysicalRoomStatus = async (roomId: string, status: RoomStatus) => {
   return room;
 };
 
+const updateRoomType = async (id: string, payload: Partial<CreateRoomTypePayload>) => {
+  const existing = await prisma.roomType.findUnique({
+    where: { id },
+  });
+
+  if (!existing) {
+    throw new AppError(404, 'Room type not found');
+  }
+
+  const roomType = await prisma.roomType.update({
+    where: { id },
+    data: payload,
+    include: {
+      _count: { select: { rooms: true } },
+    },
+  });
+
+  return roomType;
+};
+
 export const roomService = {
   getAllRoomTypes,
   getRoomTypeBySlug,
   createRoomType,
+  updateRoomType,
   getAllPhysicalRooms,
   createPhysicalRoom,
   updatePhysicalRoomStatus,
