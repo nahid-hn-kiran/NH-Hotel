@@ -16,10 +16,21 @@ import { agentRoutes } from './modules/agent/agent.routes.js';
 const app: Express = express();
 
 app.use(helmet());
+
+const allowedOrigins = Array.from(
+  new Set([
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    env.CORS_ORIGIN,
+  ].filter(Boolean))
+);
+
 app.use(
   cors({
-    origin: env.CORS_ORIGIN,
+    origin: allowedOrigins,
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie'],
   })
 );
 
