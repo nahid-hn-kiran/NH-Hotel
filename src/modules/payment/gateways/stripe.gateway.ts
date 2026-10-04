@@ -16,7 +16,6 @@ export class StripeGateway implements IPaymentGatewayStrategy {
 
   async initializePayment(options: IPaymentInitOptions): Promise<IPaymentInitResult> {
     const session = await this.stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
       mode: 'payment',
       customer_email: options.guestEmail,
       client_reference_id: options.bookingId,
