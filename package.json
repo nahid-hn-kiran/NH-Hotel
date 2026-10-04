@@ -8,6 +8,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "rimraf dist && tsc",
     "start": "node dist/server.js",
+    "vercel-build": "prisma generate && tsc",
     "test:verify": "tsx scripts/verify-system.ts"
   },
   "prisma": {
