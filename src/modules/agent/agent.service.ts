@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import prisma from '../../config/db.js';
 import env from '../../config/env.js';
 import { AppError } from '../../shared/AppError.js';
-import { AgentRunStatus } from '@prisma/client';
+import { AgentRunStatus, Prisma } from '@prisma/client';
 import { agentTools, getOpenAIToolSpecs } from './agent.tools.js';
 
 export class AgentService {
@@ -103,7 +103,7 @@ export class AgentService {
         const message = response.choices[0]?.message;
 
         if (message?.tool_calls && message.tool_calls.length > 0) {
-          const toolCall = message.tool_calls[0];
+          const toolCall = message.tool_calls[0] as any;
           const toolName = toolCall.function.name;
           const toolArgs = JSON.parse(toolCall.function.arguments || '{}');
 
@@ -119,7 +119,7 @@ export class AgentService {
               runId: currentRun.id,
               stepNumber: iteration,
               toolName,
-              toolInput: validatedArgs,
+              toolInput: validatedArgs as Prisma.InputJsonValue,
               requiresApproval: tool.requiresApproval,
               isApproved: null,
             },
@@ -135,7 +135,7 @@ export class AgentService {
             const output = await tool.execute(validatedArgs);
             await prisma.agentStep.update({
               where: { id: step.id },
-              data: { toolOutput: output },
+              data: { toolOutput: output as Prisma.InputJsonValue },
             });
           }
         } else {
@@ -195,7 +195,7 @@ export class AgentService {
         const output = await tool.execute(step.toolInput);
         await prisma.agentStep.update({
           where: { id: stepId },
-          data: { toolOutput: output },
+          data: { toolOutput: output as Prisma.InputJsonValue },
         });
       }
 
