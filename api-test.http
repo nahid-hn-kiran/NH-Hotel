@@ -1,0 +1,211 @@
+### Hotel Operations Platform Backend API Test Suite
+@baseUrl = http://localhost:5000/api/v1
+@healthUrl = http://localhost:5000
+
+### 1. Health Check
+GET {{healthUrl}}/health
+
+### -----------------------------------------------------------------
+### 2. Authentication Module
+### -----------------------------------------------------------------
+
+### 2.1 Register New Guest
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "Jane Guest",
+  "email": "janeguest@example.com",
+  "password": "Password123!"
+}
+
+### 2.2 Login as Guest (Sets session_token cookie)
+# @name guestLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "guest@example.com",
+  "password": "Password123!"
+}
+
+### 2.3 Login as Admin (Sets session_token cookie)
+# @name adminLogin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@hotel.com",
+  "password": "Password123!"
+}
+
+### 2.4 Get Current User Profile (Protected)
+GET {{baseUrl}}/auth/me
+
+### 2.5 Logout User
+POST {{baseUrl}}/auth/logout
+
+### -----------------------------------------------------------------
+### 3. Room & Inventory Management Module
+### -----------------------------------------------------------------
+
+### 3.1 Get All Public Room Types (Paginated with Filters)
+GET {{baseUrl}}/rooms/types?page=1&limit=10&minPrice=100&maxPrice=500&capacity=2
+
+### 3.2 Get Room Type Details by Slug
+GET {{baseUrl}}/rooms/types/deluxe-king
+
+### 3.3 Create New Room Type (Admin Only)
+POST {{baseUrl}}/rooms/types
+Content-Type: application/json
+
+{
+  "name": "Penthouse Sky Suite",
+  "slug": "sky-suite",
+  "description": "Ultra-luxury top floor penthouse with panoramic city views.",
+  "basePrice": 850,
+  "capacity": 2,
+  "amenities": ["King Bed", "Private Pool", "Butler Service", "Helipad Access"],
+  "images": ["https://images.unsplash.com/photo-1582719478250-c89cae4dc85b"]
+}
+
+### 3.4 Get All Physical Rooms (Staff / Admin Only)
+GET {{baseUrl}}/rooms
+
+### 3.5 Create Physical Room (Admin Only)
+POST {{baseUrl}}/rooms
+Content-Type: application/json
+
+{
+  "roomNumber": "401",
+  "floor": 4,
+  "roomTypeId": "deluxe-king"
+}
+
+### 3.6 Update Physical Room Status (Staff / Admin)
+PATCH {{baseUrl}}/rooms/room-id-placeholder/status
+Content-Type: application/json
+
+{
+  "status": "VACANT_CLEAN"
+}
+
+### -----------------------------------------------------------------
+### 4. Booking Engine & Availability Module
+### -----------------------------------------------------------------
+
+### 4.1 Check Room Availability for Date Range
+GET {{baseUrl}}/bookings/availability?checkInDate=2026-11-01&checkOutDate=2026-11-05
+
+### 4.2 Create New Reservation (Guest Protected)
+POST {{baseUrl}}/bookings
+Content-Type: application/json
+
+{
+  "roomTypeId": "deluxe-king",
+  "checkInDate": "2026-11-01",
+  "checkOutDate": "2026-11-05"
+}
+
+### 4.3 Get Logged-in Guest Reservations
+GET {{baseUrl}}/bookings/me?page=1&limit=10
+
+### 4.4 Get Reservation Details by ID
+GET {{baseUrl}}/bookings/booking-id-placeholder
+
+### 4.5 Cancel Reservation
+PATCH {{baseUrl}}/bookings/booking-id-placeholder/cancel
+
+### 4.6 Update Booking Status to CHECKED_IN (Staff / Admin)
+PATCH {{baseUrl}}/bookings/booking-id-placeholder/status
+Content-Type: application/json
+
+{
+  "status": "CHECKED_IN"
+}
+
+### -----------------------------------------------------------------
+### 5. Multi-Gateway Payment Module
+### -----------------------------------------------------------------
+
+### 5.1 Initialize Stripe Payment Checkout
+POST {{baseUrl}}/payments/init
+Content-Type: application/json
+
+{
+  "bookingId": "booking-id-placeholder",
+  "provider": "STRIPE"
+}
+
+### 5.2 Initialize SSLCommerz Payment Checkout
+POST {{baseUrl}}/payments/init
+Content-Type: application/json
+
+{
+  "bookingId": "booking-id-placeholder",
+  "provider": "SSLCOMMERZ"
+}
+
+### 5.3 Mock SSLCommerz IPN Webhook Callback
+POST {{baseUrl}}/payments/webhook/sslcommerz
+Content-Type: application/json
+
+{
+  "status": "VALID",
+  "tran_id": "SSLC_TEST_TX_ID",
+  "val_id": "VAL_123456",
+  "amount": "880.00",
+  "currency": "USD"
+}
+
+### -----------------------------------------------------------------
+### 6. In-Database Semantic RAG Engine Module
+### -----------------------------------------------------------------
+
+### 6.1 Ingest Knowledge Document Chunk with Vector Embedding (Admin)
+POST {{baseUrl}}/rag/ingest
+Content-Type: application/json
+
+{
+  "title": "Swimming Pool & Spa Hours",
+  "content": "The rooftop infinity pool and wellness spa are open daily from 6:00 AM to 10:00 PM for all registered hotel guests.",
+  "metadata": {
+    "category": "amenities",
+    "floor": 10
+  }
+}
+
+### 6.2 Ask AI Concierge a Semantic Question (Public)
+POST {{baseUrl}}/rag/ask
+Content-Type: application/json
+
+{
+  "query": "What time does the swimming pool close?"
+}
+
+### -----------------------------------------------------------------
+### 7. Autonomous Operations Agent & SSE Stream Module
+### -----------------------------------------------------------------
+
+### 7.1 Dispatch Autonomous Operations Agent Run (Staff / Admin)
+POST {{baseUrl}}/agent/runs
+Content-Type: application/json
+
+{
+  "triggerEvent": "ROOM_TURNOVER",
+  "prompt": "Room 201 was checked out. Assign housekeeping to clean the room with high priority."
+}
+
+### 7.2 Get Agent Run Status and Step Logs
+GET {{baseUrl}}/agent/runs/run-id-placeholder
+
+### 7.3 Approve Pending Agent Step (Admin HITL)
+POST {{baseUrl}}/agent/runs/run-id-placeholder/steps/step-id-placeholder/approve
+Content-Type: application/json
+
+{
+  "approved": true
+}
+
+### 7.4 Stream Real-time Agent Execution Logs (SSE)
+GET {{baseUrl}}/agent/runs/run-id-placeholder/stream
