@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 services:
   postgres:
@@ -10,18 +10,49 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: nh_hotel
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d nh_hotel"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
     container_name: nh_hotel_redis
     restart: always
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nh_hotel_api
+    restart: always
+    ports:
+      - '5000:5000'
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/nh_hotel?schema=public"
+      REDIS_URL: "redis://redis:6379"
+      CORS_ORIGIN: "http://localhost:3000"
+      CLIENT_URL: "http://localhost:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:
