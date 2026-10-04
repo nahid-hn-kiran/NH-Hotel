@@ -7,6 +7,7 @@ import { sendResponse } from './shared/sendResponse.js';
 import { notFound } from './middlewares/notFound.js';
 import { globalErrorHandler } from './middlewares/globalErrorHandler.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
+import { roomRoutes } from './modules/room/room.routes.js';
 
 const app: Express = express();
 
@@ -35,6 +36,7 @@ app.get('/health', (_req: Request, res: Response) => {
 
 // API Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/rooms', roomRoutes);
 
 // 404 Handler
 app.use(notFound);
