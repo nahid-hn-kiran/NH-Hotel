@@ -15,6 +15,9 @@ export class StripeGateway implements IPaymentGatewayStrategy {
   }
 
   async initializePayment(options: IPaymentInitOptions): Promise<IPaymentInitResult> {
+    const successUrl = `${env.CLIENT_URL}/checkout/${options.bookingId}/success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${env.CLIENT_URL}/checkout/${options.bookingId}?cancelled=true`;
+
     const session = await this.stripe.checkout.sessions.create({
       mode: 'payment',
       customer_email: options.guestEmail,
@@ -25,21 +28,24 @@ export class StripeGateway implements IPaymentGatewayStrategy {
       line_items: [
         {
           price_data: {
-            currency: options.currency.toLowerCase(),
+            currency: (options.currency || 'usd').toLowerCase(),
             product_data: {
-              name: `Hotel Booking Reservation #${options.bookingId}`,
+              name: options.roomTypeName || `Hotel Suite Reservation #${options.bookingId}`,
             },
             unit_amount: Math.round(options.amount * 100),
           },
           quantity: 1,
         },
       ],
-      success_url: options.successUrl,
-      cancel_url: options.failUrl,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
     });
 
+    const redirectUrl = session.url || `${env.CLIENT_URL}/checkout/${options.bookingId}/success`;
+
     return {
-      paymentGatewayUrl: session.url || `${env.CLIENT_URL}/payments/success?session_id=${session.id}`,
+      paymentGatewayUrl: redirectUrl,
+      checkoutUrl: redirectUrl,
       transactionId: session.id,
     };
   }

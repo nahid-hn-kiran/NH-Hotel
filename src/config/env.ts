@@ -8,6 +8,7 @@ const envSchema = z.object({
   REDIS_URL: z.string().url('REDIS_URL must be a valid URL'),
   CORS_ORIGIN: z.string().default('http://localhost:3000'),
   CLIENT_URL: z.string().default('http://localhost:3000'),
+  BACKEND_BASE_URL: z.string().default('http://localhost:5000'),
   STRIPE_SECRET_KEY: z.string().default('sk_test_placeholder'),
   STRIPE_WEBHOOK_SECRET: z.string().default('whsec_placeholder'),
   SSLCOMMERZ_STORE_ID: z.string().default('sandbox_store'),

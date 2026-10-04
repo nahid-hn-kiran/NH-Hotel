@@ -22,5 +22,9 @@ router.post(
 );
 
 router.post('/webhook/sslcommerz', paymentController.sslcommerzIpn);
+router.get('/webhook/sslcommerz/success', paymentController.sslcommerzSuccessCallback);
+router.post('/webhook/sslcommerz/success', paymentController.sslcommerzSuccessCallback);
+router.get('/webhook/sslcommerz/fail', paymentController.sslcommerzFailCallback);
+router.post('/webhook/sslcommerz/fail', paymentController.sslcommerzFailCallback);
 
 export const paymentRoutes = router;

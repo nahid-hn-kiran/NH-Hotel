@@ -65,8 +65,8 @@ const initializePayment = async (
     },
   });
 
-  const successUrl = `${env.CLIENT_URL}/payments/success?booking_id=${booking.id}&tx_id=${paymentRecord.id}`;
-  const failUrl = `${env.CLIENT_URL}/payments/failed?booking_id=${booking.id}`;
+  const successUrl = `${env.CLIENT_URL}/checkout/${booking.id}/success?tx_id=${paymentRecord.id}`;
+  const failUrl = `${env.CLIENT_URL}/checkout/${booking.id}?cancelled=true`;
 
   const initResult = await gateway.initializePayment({
     bookingId: booking.id,
@@ -74,6 +74,7 @@ const initializePayment = async (
     currency: 'USD',
     guestEmail: booking.guest.email,
     guestName: booking.guest.name || 'Valued Guest',
+    roomTypeName: booking.room?.roomType?.name,
     successUrl,
     failUrl,
   });
@@ -86,7 +87,10 @@ const initializePayment = async (
     },
   });
 
-  return initResult;
+  return {
+    ...initResult,
+    checkoutUrl: initResult.checkoutUrl || initResult.paymentGatewayUrl,
+  };
 };
 
 const handlePaymentSuccess = async (transactionId: string, providerMetadata?: any) => {

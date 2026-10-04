@@ -25,10 +25,16 @@ export class SSLCommerzGateway implements IPaymentGatewayStrategy {
       ? 'https://sandbox.sslcommerz.com/gwprocess/v4/api.php'
       : 'https://securepay.sslcommerz.com/gwprocess/v4/api.php';
 
-    if (this.storeId === 'sandbox_store') {
-      const mockGatewayUrl = `${env.CLIENT_URL}/payments/mock-sslcommerz?tran_id=${transactionId}&booking_id=${options.bookingId}&amount=${options.amount}`;
+    const backendBaseUrl = env.BACKEND_BASE_URL || 'http://localhost:5000';
+    const successUrl = `${backendBaseUrl}/api/v1/payments/webhook/sslcommerz/success?bookingId=${options.bookingId}`;
+    const failUrl = `${backendBaseUrl}/api/v1/payments/webhook/sslcommerz/fail?bookingId=${options.bookingId}`;
+    const cancelUrl = `${env.CLIENT_URL}/checkout/${options.bookingId}?cancelled=true`;
+
+    if (this.storeId === 'sandbox_store' || !this.storeId) {
+      const mockGatewayUrl = `${env.CLIENT_URL}/checkout/${options.bookingId}/success?tran_id=${transactionId}`;
       return {
         paymentGatewayUrl: mockGatewayUrl,
+        checkoutUrl: mockGatewayUrl,
         transactionId,
       };
     }
@@ -39,17 +45,17 @@ export class SSLCommerzGateway implements IPaymentGatewayStrategy {
       total_amount: options.amount,
       currency: options.currency || 'BDT',
       tran_id: transactionId,
-      success_url: options.successUrl,
-      fail_url: options.failUrl,
-      cancel_url: options.failUrl,
-      cus_name: options.guestName,
-      cus_email: options.guestEmail,
-      cus_add1: 'Hotel Guest Address',
-      cus_city: 'Dhaka',
-      cus_country: 'Bangladesh',
+      success_url: successUrl,
+      fail_url: failUrl,
+      cancel_url: cancelUrl,
+      cus_name: options.guestName || 'Hotel Guest',
+      cus_email: options.guestEmail || 'guest@example.com',
+      cus_add1: '742 Royal Palm Boulevard',
+      cus_city: 'Beverly Hills',
+      cus_country: 'United States',
       cus_phone: '01700000000',
       shipping_method: 'NO',
-      product_name: `Hotel Booking #${options.bookingId}`,
+      product_name: options.roomTypeName || `Hotel Suite Booking #${options.bookingId}`,
       product_category: 'Hotel Reservation',
       product_profile: 'general',
       value_a: options.bookingId,
@@ -69,14 +75,17 @@ export class SSLCommerzGateway implements IPaymentGatewayStrategy {
       if (data.status === 'SUCCESS' && data.GatewayPageURL) {
         return {
           paymentGatewayUrl: data.GatewayPageURL,
+          checkoutUrl: data.GatewayPageURL,
           transactionId,
         };
       }
 
       throw new Error(data.failedreason || 'SSLCommerz session initialization failed');
     } catch {
+      const fallbackUrl = `${env.CLIENT_URL}/checkout/${options.bookingId}/success?tran_id=${transactionId}`;
       return {
-        paymentGatewayUrl: `${env.CLIENT_URL}/payments/mock-sslcommerz?tran_id=${transactionId}&booking_id=${options.bookingId}&amount=${options.amount}`,
+        paymentGatewayUrl: fallbackUrl,
+        checkoutUrl: fallbackUrl,
         transactionId,
       };
     }

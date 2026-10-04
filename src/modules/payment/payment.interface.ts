@@ -6,10 +6,12 @@ export interface IPaymentInitOptions {
   guestName: string;
   successUrl: string;
   failUrl: string;
+  roomTypeName?: string;
 }
 
 export interface IPaymentInitResult {
   paymentGatewayUrl: string;
+  checkoutUrl?: string;
   transactionId: string;
 }
 
