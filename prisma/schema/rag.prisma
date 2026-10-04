@@ -1,0 +1,8 @@
+model DocumentChunk {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  metadata  Json?
+  embedding Unsupported("vector(1536)")
+  createdAt DateTime @default(now())
+}

@@ -8,7 +8,7 @@ export class AppError extends Error {
     message: string,
     errors?: Record<string, unknown> | Array<unknown>,
     isOperational = true,
-    stack = ''
+    stack = "",
   ) {
     super(message);
     this.statusCode = statusCode;

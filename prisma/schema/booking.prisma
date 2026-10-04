@@ -1,0 +1,18 @@
+model Booking {
+  id           String        @id @default(cuid())
+  bookingCode  String        @unique
+  guestId      String
+  guest        User          @relation(fields: [guestId], references: [id])
+  roomId       String
+  room         Room          @relation(fields: [roomId], references: [id])
+  checkInDate  DateTime      @db.Date
+  checkOutDate DateTime      @db.Date
+  totalAmount  Decimal       @db.Decimal(10, 2)
+  status       BookingStatus @default(PENDING_PAYMENT)
+  payments     Payment[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([checkInDate, checkOutDate])
+  @@index([roomId])
+}
