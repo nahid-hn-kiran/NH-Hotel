@@ -44,16 +44,13 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Health check endpoint
+// Health check endpoints
 app.get('/health', (_req: Request, res: Response) => {
-  sendResponse(res, {
-    statusCode: 200,
-    message: 'Health check successful',
-    data: {
-      status: 'ok',
-      uptime: process.uptime(),
-    },
-  });
+  res.status(200).json({ status: 'healthy', service: 'nh-hotel-backend', timestamp: new Date().toISOString() });
+});
+
+app.get('/', (_req: Request, res: Response) => {
+  res.status(200).json({ status: 'healthy', service: 'nh-hotel-backend', timestamp: new Date().toISOString() });
 });
 
 // API Routes
