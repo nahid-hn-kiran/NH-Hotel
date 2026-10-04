@@ -13,6 +13,7 @@ const envSchema = z.object({
   SSLCOMMERZ_STORE_ID: z.string().default('sandbox_store'),
   SSLCOMMERZ_STORE_PASSWORD: z.string().default('sandbox_pass'),
   SSLCOMMERZ_IS_SANDBOX: z.coerce.boolean().default(true),
+  OPENAI_API_KEY: z.string().default('sk-mock-key-for-local-dev'),
 });
 
 const _env = envSchema.safeParse(process.env);
