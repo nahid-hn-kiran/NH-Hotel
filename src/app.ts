@@ -9,6 +9,7 @@ import { globalErrorHandler } from './middlewares/globalErrorHandler.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import { roomRoutes } from './modules/room/room.routes.js';
 import { bookingRoutes } from './modules/booking/booking.routes.js';
+import { paymentRoutes } from './modules/payment/payment.routes.js';
 
 const app: Express = express();
 
@@ -19,7 +20,14 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());
+
+app.use(
+  express.json({
+    verify: (req: any, _res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -39,6 +47,7 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/rooms', roomRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
+app.use('/api/v1/payments', paymentRoutes);
 
 // 404 Handler
 app.use(notFound);
